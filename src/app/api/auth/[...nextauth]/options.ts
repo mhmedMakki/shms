@@ -1,5 +1,4 @@
 import { API_URL } from '@/data/constants'
-import { UserProps } from '@/types'
 import axios from 'axios'
 
 import type { Account, NextAuthOptions, Profile, Session, User } from 'next-auth'
@@ -37,19 +36,13 @@ export const options: NextAuthOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async signIn({ account, profile }): Promise<string | boolean> {
-      if (account?.provider === 'google') {
-        const { email } = profile!
-        if (!email) throw new Error('No email found')
-
-        return true
-      }
-
+    async signIn() {
       return true
     },
-    async session(params: { session: Session; token: JWT; user: User }) {
-      const { session, token } = params
-      return Promise.resolve({ session, token, expires: session.expires })
+    async session(params): Promise<Session> {
+      const session = params.session
+      // return Promise.resolve({ session, token, expires: session.expires })
+      return session
     },
     async jwt(params: {
       token: JWT
@@ -57,27 +50,12 @@ export const options: NextAuthOptions = {
       account: Account | null
       profile?: Profile
     }) {
-      const { token, user, profile } = params
+      const { token, user } = params
 
-      if (profile) {
-        const { data: userExists }: { data: User & UserProps } = await axios.post(
-          `${API_URL}/users/emailExists`,
-          { userEmail: profile?.email ?? '' }
-        )
-
-        if (userExists) {
-          token.user = userExists
-
-          return token
-        } else {
-          token.user = user
-          return token
-        }
-      } else if (user) {
+      if (user) {
         token.user = user
       }
       return Promise.resolve(token)
-      // return token
     }
   }
 }

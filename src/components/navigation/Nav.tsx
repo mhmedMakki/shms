@@ -26,7 +26,7 @@ export default function Nav() {
 
   const isAuth = status === 'authenticated' ? true : false
 
-  console.log('session?.user?.name -->', session?.user?.name)
+  console.log('session -->', session)
 
   const [isOpen, setIsOpen] = useState(false)
   const [sticky, setSticky] = useState(false)

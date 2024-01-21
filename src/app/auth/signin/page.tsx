@@ -13,7 +13,7 @@ import type { UserProps } from '@/types'
 
 import { CardWrapper } from '@/components/auth/card-wrapper'
 import { Button } from '@/components/ui/button'
-import { Error } from '@/components/icons/Status'
+import { Error, Success } from '@/components/icons/Status'
 import FormMessage from '@/components/custom/FormMessage'
 
 const SigninPage = () => {
@@ -81,7 +81,7 @@ const SigninPage = () => {
 
         // if the status is 400 or 401 show error message
         if (results?.status === 400 || results?.status === 401) {
-          toast(`عفواً، حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى!`, {
+          toast(`عفواً، بيانات الدخول غير صحيحة يرجى التأكد من ثم المحاولة مرة أخرى!`, {
             icon: <Error className='w-6 h-6 ml-3' />,
             position: 'bottom-center',
             className: 'text-right select-none rtl',
@@ -96,10 +96,10 @@ const SigninPage = () => {
         } else {
           // data.loggedIn === 1
           toast('تم تسجيل دخولك بنجاح', {
-            icon: <Info className='text-blue-300' />,
+            icon: <Success />,
             position: 'bottom-center',
             className: 'text-right select-none rtl',
-            duration: DEFAULT_DURATION - 2000,
+            duration: DEFAULT_DURATION,
             style: {
               backgroundColor: '#F0FAF0',
               color: '#367E18',
@@ -108,12 +108,13 @@ const SigninPage = () => {
               textAlign: 'justify'
             }
           })
-        }
 
-        //redirect to the home page if sign in successfully
-        setTimeout(() => replace(`/`), DEFAULT_DURATION)
+          //redirect to the home page if sign in successfully
+          setTimeout(() => replace(`/`), DEFAULT_DURATION)
+        }
       } catch (error: any) {
-        const message: UserProps['message'] = error?.response.data.message ?? 'حدث خطأ ما'
+        const message: UserProps['message'] =
+          error?.response?.data?.message ?? 'حدث خطأ ما'
         //handle error, show notification using Shadcn notifcation
         toast(message, {
           icon: <Error className='w-6 h-6 ml-3' />,
