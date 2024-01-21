@@ -26,7 +26,7 @@ export default function Slider({ images }: { images: string[] }) {
       <Carousel
         setApi={setApi}
         opts={{ loop: true }}
-        plugins={[Autoplay({ delay: 2000 })]}
+        plugins={[Autoplay({ delay: 5000 })]}
         className='w-full'
       >
         <CarouselContent overlay={<Overlay className='opacity-20' />}>
