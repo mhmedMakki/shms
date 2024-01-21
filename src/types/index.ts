@@ -1,8 +1,11 @@
 import { NextApiRequest } from 'next'
+import { Session } from 'next-auth'
+import { JWT } from 'next-auth/jwt'
 
 export type UserProps = {
   shms_id: string
   shms_fullname: string
+  fullname?: string
   shms_nationality: string
   shms_date_of_birth: Date
   shms_email: string
@@ -23,6 +26,14 @@ export type UserProps = {
   // When user is activated, this is set to 1
   userActivated?: number
 }
+
+export type UserLoggedInProps =
+  | (Session & {
+      token?: JWT & {
+        user: UserProps
+      }
+    })
+  | null
 
 export type FileUploadProps = {
   file: File[]
