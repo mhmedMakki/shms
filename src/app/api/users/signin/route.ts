@@ -4,7 +4,7 @@ import type { UserProps } from '@/types'
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { email, phone, password } = body
+  const { email, phone, password, emailOrPhone } = body
 
   if (email === '' || phone === '') {
     return new Response(
@@ -18,8 +18,8 @@ export async function POST(req: Request) {
     // Check for user by using his/her email or Phoneephone number
     const user = (
       (await connectDB(`SELECT * FROM users WHERE shms_email = ? OR shms_phone = ?`, [
-        email,
-        phone
+        email ?? emailOrPhone,
+        phone ?? emailOrPhone
       ])) as UserProps[]
     )[0]
 

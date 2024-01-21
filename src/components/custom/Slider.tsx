@@ -35,6 +35,7 @@ export default function Slider({ images }: { images: string[] }) {
               <CardContent className='flex items-center justify-center w-screen min-w-[100svh] h-1/4 sm:h-1/2 md:h-[35rem] max-h-max p-0'>
                 <Image
                   src={image}
+                  // proiority={index === 0 ? true : false}
                   alt={`Slide ${index + 1}`}
                   className='w-full h-full object-cover'
                   width={'1024'}
