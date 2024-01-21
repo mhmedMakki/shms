@@ -24,13 +24,13 @@ export async function POST(req: Request) {
     )[0]
 
     if (!user) {
-      return new Response(JSON.stringify({ LoggedIn: 0, message: 'User not found' }))
+      return new Response(JSON.stringify({ loggedIn: 0, message: 'User not found' }))
     }
 
     if (user.shms_user_account_status === 'block') {
       return new Response(
         JSON.stringify({
-          LoggedIn: 0,
+          loggedIn: 0,
           message: 'Your Account Has Been Blocked, Please Contact The Admin'
         }),
         { status: 403 }
@@ -38,7 +38,7 @@ export async function POST(req: Request) {
     } else if (user.shms_user_account_status === 'pending') {
       return new Response(
         JSON.stringify({
-          LoggedIn: 0,
+          loggedIn: 0,
           message: 'Your Account Is Pending, Please Activate Your Account First'
         }),
         { status: 403 }
@@ -46,14 +46,15 @@ export async function POST(req: Request) {
     } else if (user && (await compare(password, user.shms_password!))) {
       return new Response(
         JSON.stringify({
-          LoggedIn: 1,
+          loggedIn: 1,
+          fullname: user.shms_fullname,
           message: 'Successfully Logged In'
         })
       )
     } else {
       return new Response(
         JSON.stringify({
-          LoggedIn: 0,
+          loggedIn: 0,
           message: 'Invalid Email/Telephone Number Or Password'
         }),
         { status: 401 }

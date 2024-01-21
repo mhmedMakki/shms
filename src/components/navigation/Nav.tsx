@@ -20,13 +20,12 @@ import { MenuToggler } from './MenuToggler'
 import { cn } from '@/lib/utils'
 import useEventListener from '@/hooks/useEventListener'
 import { APP_URL } from '@/data/constants'
+import { UserProps } from '@/types'
 
 export default function Nav() {
   const { status, data: session } = useSession()
 
   const isAuth = status === 'authenticated' ? true : false
-
-  console.log('session -->', session)
 
   const [isOpen, setIsOpen] = useState(false)
   const [sticky, setSticky] = useState(false)

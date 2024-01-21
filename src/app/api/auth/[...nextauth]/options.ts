@@ -1,7 +1,7 @@
 import { API_URL } from '@/data/constants'
 import axios from 'axios'
 
-import type { Account, NextAuthOptions, Profile, Session, User } from 'next-auth'
+import type { NextAuthOptions, Session, User } from 'next-auth'
 import { JWT } from 'next-auth/jwt'
 import CredentialsProvider from 'next-auth/providers/credentials'
 
@@ -22,7 +22,7 @@ export const options: NextAuthOptions = {
         try {
           const loginUser = await axios.post(`${API_URL}/users/signin`, credentials)
           const { data: user } = loginUser
-          if (user && user.LoggedIn === 1) {
+          if (user && user.loggedIn === 1) {
             return Promise.resolve(user)
           }
 
@@ -40,16 +40,10 @@ export const options: NextAuthOptions = {
       return true
     },
     async session(params): Promise<Session> {
-      const session = params.session
-      // return Promise.resolve({ session, token, expires: session.expires })
-      return session
+      const { session, token } = params
+      return Promise.resolve({ session, token, expires: session.expires })
     },
-    async jwt(params: {
-      token: JWT
-      user: User
-      account: Account | null
-      profile?: Profile
-    }) {
+    async jwt(params: { token: JWT; user: User }) {
       const { token, user } = params
 
       if (user) {
