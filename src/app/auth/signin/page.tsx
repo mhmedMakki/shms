@@ -3,7 +3,7 @@
 import { ChangeEvent, useState } from 'react'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 import { ReloadIcon } from '@radix-ui/react-icons'
 import { DEFAULT_DURATION } from '@/data/constants'
@@ -22,6 +22,7 @@ const SigninPage = () => {
   const [isSubmittingForm, setIsSubmittingForm] = useState(false)
 
   const { replace } = useRouter()
+  const redirectUrl = useSearchParams().get('callbackUrl')
 
   // Errors States
   const [emailOrPhoneError, setEmailOrPhoneError] = useState('')
@@ -109,7 +110,7 @@ const SigninPage = () => {
           })
 
           //redirect to the home page if sign in successfully
-          setTimeout(() => replace(`/`), DEFAULT_DURATION)
+          setTimeout(() => replace(redirectUrl ?? `/`), DEFAULT_DURATION)
         }
       } catch (error: any) {
         const message: UserProps['message'] =

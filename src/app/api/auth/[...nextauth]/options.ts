@@ -51,5 +51,8 @@ export const options: NextAuthOptions = {
       }
       return Promise.resolve(token)
     }
+  },
+  pages: {
+    signIn: '/auth/signin'
   }
 }
