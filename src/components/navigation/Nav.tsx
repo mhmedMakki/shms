@@ -22,8 +22,11 @@ import useEventListener from '@/hooks/useEventListener'
 import { APP_URL } from '@/data/constants'
 
 export default function Nav() {
-  const { status } = useSession()
+  const { status, data: session } = useSession()
+
   const isAuth = status === 'authenticated' ? true : false
+
+  console.log('session?.user?.name -->', session?.user?.name)
 
   const [isOpen, setIsOpen] = useState(false)
   const [sticky, setSticky] = useState(false)
@@ -53,10 +56,6 @@ export default function Nav() {
     scrollTop > 200 ? setSticky(true) : setSticky(false)
   }
   useEventListener('scroll', isSticky)
-
-  const { data: session } = useSession()
-  console.log('status -->', status)
-  console.log('session -->', session)
 
   return (
     <header
@@ -113,7 +112,7 @@ export default function Nav() {
                     <NavigationListItem
                       className={isAuth ? `w-1/2 text-center` : `w-full`}
                       href={isAuth ? `/profile` : `/auth/signin`}
-                      title={isAuth ? `حسابي` : `تسجيل الدخول`}
+                      title={isAuth ? session?.user?.name ?? 'حسابي' : `تسجيل الدخول`}
                     ></NavigationListItem>
                     {isAuth && (
                       <NavigationListItem className='cursor-pointer w-1/2'>
@@ -179,6 +178,7 @@ export default function Nav() {
             <Link className='font-bold' href={'/'}>
               <Image
                 src='/logo-slogan.svg'
+                priority={true}
                 width={150}
                 height={50}
                 alt='شمس الزراعية'

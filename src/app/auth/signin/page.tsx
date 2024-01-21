@@ -110,6 +110,7 @@ const SigninPage = () => {
           })
         }
 
+        //redirect to the home page if sign in successfully
         setTimeout(() => replace(`/`), DEFAULT_DURATION)
       } catch (error: any) {
         const message: UserProps['message'] = error?.response.data.message ?? 'حدث خطأ ما'
