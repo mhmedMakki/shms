@@ -78,9 +78,6 @@ const SigninPage = () => {
           emailOrPhone: emailOrPhone.trim().toLowerCase(),
           password
         })
-        //mr.hamood277@gmail.com
-
-        console.log('results --> ', results)
 
         // if the status is 400 or 401 show error message
         if (results?.status === 400 || results?.status === 401) {

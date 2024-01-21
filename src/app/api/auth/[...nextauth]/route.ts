@@ -22,8 +22,6 @@ const handler = NextAuth({
 
         if (emailOrPhone === '' || password === '') return null
 
-        console.log('credentials ARE =>', credentials)
-
         try {
           const loginUser = await axios.post(`${API_URL}/users/signin`, credentials)
           const { data: user } = loginUser

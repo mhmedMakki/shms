@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useSession } from 'next-auth/react'
+import { signOut, useSession } from 'next-auth/react'
 import Image from 'next/image'
 import Link from 'next/link'
 import {
@@ -19,6 +19,7 @@ import { ModeToggle } from './ModeToggle'
 import { MenuToggler } from './MenuToggler'
 import { cn } from '@/lib/utils'
 import useEventListener from '@/hooks/useEventListener'
+import { APP_URL } from '@/data/constants'
 
 export default function Nav() {
   const { status } = useSession()
@@ -52,6 +53,10 @@ export default function Nav() {
     scrollTop > 200 ? setSticky(true) : setSticky(false)
   }
   useEventListener('scroll', isSticky)
+
+  const { data: session } = useSession()
+  console.log('status -->', status)
+  console.log('session -->', session)
 
   return (
     <header
@@ -114,7 +119,9 @@ export default function Nav() {
                       <NavigationListItem className='cursor-pointer w-1/2'>
                         <button
                           className='flex gap-2 md:gap-1 items-center justify-center min-w-max'
-                          // onClick={signOut()}
+                          onClick={async () =>
+                            await signOut({ redirect: true, callbackUrl: APP_URL ?? '/' })
+                          }
                         >
                           <LogOut className='text-[#FDB813]' />
                           <span className='hidden md:inline-block'>تسجيل الخروج</span>
