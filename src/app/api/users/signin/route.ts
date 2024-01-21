@@ -60,6 +60,7 @@ export async function POST(req: Request) {
       )
     }
   } catch (error) {
+    console.error(error)
     throw new Error('Error during authorization')
   }
 }

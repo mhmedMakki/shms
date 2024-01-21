@@ -2,12 +2,12 @@
 
 import { ChangeEvent, useState } from 'react'
 import Link from 'next/link'
+import { signIn } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import axios from 'axios'
 import { toast } from 'sonner'
 import { Info } from 'lucide-react'
 import { ReloadIcon } from '@radix-ui/react-icons'
-import { API_URL, DEFAULT_DURATION } from '@/data/constants'
+import { DEFAULT_DURATION } from '@/data/constants'
 import { validatePasswordStrength } from '@/lib/utils'
 import type { UserProps } from '@/types'
 
@@ -65,7 +65,7 @@ const SigninPage = () => {
     } else if (password === '') {
       resetFormErrors()
       setPassError('الرجاء التأكد من إدخال كلمة المرور')
-    } else if (validatePasswordStrength(password)) {
+    } else if (!validatePasswordStrength(password)) {
       resetFormErrors()
       setEmailOrPhoneError('الرجاء التأكد من صحة كلمة المرور')
     } else {
@@ -73,15 +73,28 @@ const SigninPage = () => {
         resetFormErrors()
         setIsSubmittingForm(true)
 
-        const signIn: { data: UserProps } = await axios.post(`${API_URL}/users/signin`, {
-          emailOrPhone,
+        const { status, error } = await signIn('credentials', {
+          redirect: false,
+          emailOrPhone: emailOrPhone.trim().toLowerCase(),
           password
         })
-        //getting response from backend
-        const { data } = signIn
 
-        // make sure to view the response from the data
-        data.loggedIn === 1 &&
+        // if the status is 400 or 401 show error message
+        if (status === 400 || status === 401) {
+          toast(`عفواً، حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى!`, {
+            icon: <Error className='w-6 h-6 ml-3' />,
+            position: 'bottom-center',
+            className: 'text-right select-none rtl',
+            style: {
+              backgroundColor: '#FFF0F0',
+              color: '#BE2A2A',
+              border: '1px solid #BE2A2A',
+              gap: '1.5rem',
+              textAlign: 'justify'
+            }
+          })
+        } else {
+          // data.loggedIn === 1
           toast('تم تسجيل دخولك بنجاح', {
             icon: <Info className='text-blue-300' />,
             position: 'bottom-center',
@@ -95,6 +108,7 @@ const SigninPage = () => {
               textAlign: 'justify'
             }
           })
+        }
 
         setTimeout(() => replace(`/`), DEFAULT_DURATION)
       } catch (error: any) {
