@@ -8,6 +8,11 @@ import { toast } from 'sonner'
 import { Info } from 'lucide-react'
 import { ReloadIcon } from '@radix-ui/react-icons'
 import { API_URL, DEFAULT_DURATION } from '@/data/constants'
+import {
+  validateEmail,
+  validatePasswordStrength,
+  validateQatarPhoneNumber
+} from '@/lib/utils'
 import type { UserProps } from '@/types'
 
 import { CardWrapper } from '@/components/auth/card-wrapper'
@@ -36,6 +41,8 @@ const SignupPage = () => {
   const [file, setFile] = useState<File[]>([])
   const [isSubmittingForm, setIsSubmittingForm] = useState(false)
 
+  const { replace } = useRouter()
+
   const onFileAdd = (e: { target: { files: any } }) => {
     setFile(e.target.files)
   }
@@ -51,44 +58,12 @@ const SignupPage = () => {
   const [fileError, setFileError] = useState('')
   const [acceptedTermError, setAcceptedTermError] = useState('')
 
-  const validateQatarPhoneNumber = (phoneNumber: string) => {
-    const qatarPhoneNumberRegex = /^[34567]\d{7}$/
-    return qatarPhoneNumberRegex.test(phoneNumber)
-  }
-
-  const validateEmail = (email: string) => {
-    return String(email)
-      .toLowerCase()
-      .match(
-        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-      )
-  }
-
   const blurEmail = (e: string) => {
     if (!validateEmail(e)) {
       setEmailError('الرجاء التأكد من صحة البريد الالكتروني')
     } else {
       setEmailError('')
     }
-  }
-
-  const validatePasswordStrength = (password: string) => {
-    // Define password strength criteria using regular expressions
-    const minLength = 8
-    const hasUpperCase = /[A-Z]/.test(password)
-    const hasLowerCase = /[a-z]/.test(password)
-    const hasDigit = /\d/.test(password)
-    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password)
-
-    // Check if the password meets all criteria
-    const isValid =
-      password.length >= minLength &&
-      hasUpperCase &&
-      hasLowerCase &&
-      hasDigit &&
-      hasSpecialChar
-
-    return isValid
   }
 
   const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -153,8 +128,6 @@ const SignupPage = () => {
   useEffect(() => {
     setUserFullName(`${fName} ${sName} ${tName} ${foName}`)
   }, [fName, sName, tName, foName])
-
-  const { replace } = useRouter()
 
   const handelSignupForm = async (e: {
     target: any
