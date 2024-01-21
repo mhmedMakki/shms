@@ -3,11 +3,11 @@
 import { ChangeEvent, useState } from 'react'
 import Link from 'next/link'
 import { signIn } from 'next-auth/react'
-// import { useRouter } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-// import { Info } from 'lucide-react'
+import { Info } from 'lucide-react'
 import { ReloadIcon } from '@radix-ui/react-icons'
-// import { DEFAULT_DURATION } from '@/data/constants'
+import { DEFAULT_DURATION } from '@/data/constants'
 import { validatePasswordStrength } from '@/lib/utils'
 import type { UserProps } from '@/types'
 
@@ -22,7 +22,7 @@ const SigninPage = () => {
   const [password, setPassword] = useState('')
   const [isSubmittingForm, setIsSubmittingForm] = useState(false)
 
-  // const { replace } = useRouter()
+  const { replace } = useRouter()
 
   // Errors States
   const [emailOrPhoneError, setEmailOrPhoneError] = useState('')
@@ -83,37 +83,37 @@ const SigninPage = () => {
         console.log('results --> ', results)
 
         // if the status is 400 or 401 show error message
-        // if (status === 400 || status === 401) {
-        //   toast(`عفواً، حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى!`, {
-        //     icon: <Error className='w-6 h-6 ml-3' />,
-        //     position: 'bottom-center',
-        //     className: 'text-right select-none rtl',
-        //     style: {
-        //       backgroundColor: '#FFF0F0',
-        //       color: '#BE2A2A',
-        //       border: '1px solid #BE2A2A',
-        //       gap: '1.5rem',
-        //       textAlign: 'justify'
-        //     }
-        //   })
-        // } else {
-        //   // data.loggedIn === 1
-        //   toast('تم تسجيل دخولك بنجاح', {
-        //     icon: <Info className='text-blue-300' />,
-        //     position: 'bottom-center',
-        //     className: 'text-right select-none rtl',
-        //     duration: DEFAULT_DURATION - 2000,
-        //     style: {
-        //       backgroundColor: '#F0FAF0',
-        //       color: '#367E18',
-        //       border: '1px solid #367E18',
-        //       gap: '1.5rem',
-        //       textAlign: 'justify'
-        //     }
-        //   })
-        // }
+        if (results?.status === 400 || results?.status === 401) {
+          toast(`عفواً، حدث خطأ غير متوقع. الرجاء المحاولة مرة أخرى!`, {
+            icon: <Error className='w-6 h-6 ml-3' />,
+            position: 'bottom-center',
+            className: 'text-right select-none rtl',
+            style: {
+              backgroundColor: '#FFF0F0',
+              color: '#BE2A2A',
+              border: '1px solid #BE2A2A',
+              gap: '1.5rem',
+              textAlign: 'justify'
+            }
+          })
+        } else {
+          // data.loggedIn === 1
+          toast('تم تسجيل دخولك بنجاح', {
+            icon: <Info className='text-blue-300' />,
+            position: 'bottom-center',
+            className: 'text-right select-none rtl',
+            duration: DEFAULT_DURATION - 2000,
+            style: {
+              backgroundColor: '#F0FAF0',
+              color: '#367E18',
+              border: '1px solid #367E18',
+              gap: '1.5rem',
+              textAlign: 'justify'
+            }
+          })
+        }
 
-        // setTimeout(() => replace(`/`), DEFAULT_DURATION)
+        setTimeout(() => replace(`/`), DEFAULT_DURATION)
       } catch (error: any) {
         const message: UserProps['message'] = error?.response.data.message ?? 'حدث خطأ ما'
         //handle error, show notification using Shadcn notifcation
