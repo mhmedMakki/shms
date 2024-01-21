@@ -1,54 +1,47 @@
-import NextAuth, { type AuthOptions, Session, User } from 'next-auth'
+import NextAuth from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
+import { connectDB } from '../../utils/db'
+import { compare } from 'bcryptjs'
+import type { UserProps } from '@/types'
 import axios from 'axios'
 import { API_URL } from '@/data/constants'
-import type { JWT } from 'next-auth/jwt'
-import type { UserProps } from '@/types'
 
 const { NEXTAUTH_SECRET } = process.env
 
-const handler = NextAuth({
-  session: {
-    strategy: 'jwt'
+export default NextAuth({
+  pages: {
+    signIn: '/'
   },
   providers: [
     CredentialsProvider({
+      id: 'credentials',
       name: 'Credentials',
       credentials: {
-        emailOrPhone: { label: 'Email or Phone Number', type: 'text' },
+        emailOrPhone: { label: 'Email or Phone', type: 'text', placeholder: '' },
         password: { label: 'Password', type: 'password' }
       },
-      async authorize(
-        credentials: Record<'emailOrPhone' | 'password', string> | undefined
-      ): Promise<User | null> {
-        try {
-          const loginUser = await axios.post(`${API_URL}/users/login`, credentials)
-          const { data: user }: { data: UserProps & { id: string } } = loginUser
-          if (user && user.loggedIn === 1) {
-            return Promise.resolve(user)
-          }
+      async authorize(credentials: any) {
+        const { emailOrPhone, password } = credentials
 
-          return Promise.resolve(null)
+        if (emailOrPhone === '' || password === '') return null
+        const loginUser = await axios.post(`${API_URL}/users/signin`, credentials)
+        const { data: user } = loginUser
+        if (user && user.LoggedIn === 1) {
+          return Promise.resolve(user)
+        }
+
+        return Promise.resolve(null)
+        try {
         } catch (error) {
-          console.error('Error during authorization:', error)
-          return Promise.resolve(null)
+          return null
         }
       }
     })
   ],
+
   secret: NEXTAUTH_SECRET,
-  callbacks: {
-    async session(params: { session: Session; token: JWT; user: User }) {
-      const { session, token } = params
-      return Promise.resolve({ session, token, expires: session.expires })
-    },
-    async jwt(params: { token: JWT; user: User }) {
-      const { token, user } = params
-      token.user = user
-
-      return token
-    }
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60 // 30 Days
   }
-} as AuthOptions)
-
-export { handler as GET, handler as POST }
+})
