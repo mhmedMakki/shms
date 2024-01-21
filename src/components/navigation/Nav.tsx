@@ -20,7 +20,6 @@ import { MenuToggler } from './MenuToggler'
 import { cn } from '@/lib/utils'
 import useEventListener from '@/hooks/useEventListener'
 import { APP_URL } from '@/data/constants'
-import { UserProps } from '@/types'
 
 export default function Nav() {
   const { status, data: session } = useSession()
