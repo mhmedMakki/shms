@@ -1,5 +1,8 @@
 export const ITEMS_PER_PAGE = 5
 
+/**
+ * @description الوفت الافتراضي لإخفاء رسالة التنبيه بعد ظهورها = 5 ثواني
+ */
 export const DEFAULT_DURATION = 5000
 
 export const APP_URL =

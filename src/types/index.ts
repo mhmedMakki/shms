@@ -25,6 +25,10 @@ export type UserProps = {
   userAdded?: number
   // When user is activated, this is set to 1
   userActivated?: number
+  // When user forgot password, this is set to 1
+  forgotPassSent?: number
+  // When user reset password, this is set to 1
+  newPassSet?: number
 }
 
 export type UserLoggedInProps =

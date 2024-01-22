@@ -6,7 +6,7 @@ import { ADMIN_EMAIL } from '@/data/constants'
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { userPassword, token } = body.json()
+  const { userPassword, token } = body
 
   try {
     // Check for user
@@ -18,20 +18,20 @@ export async function POST(req: Request) {
 
     if (!user) {
       return new Response(
-        JSON.stringify({ newPassSet: 0, message: `Sorry, we couldn't find your account` })
+        JSON.stringify({ newPassSet: 0, message: `عفواً, لا يوجد مستخدم بهذا الحساب` })
       )
     } else if (user.shms_user_account_status === 'block') {
       return new Response(
         JSON.stringify({
           newPassSet: 0,
-          message: `Your Account Has Been Blocked, Please Contact The Admin`
+          message: `عفواً, حسابك محظور, يرجى التواصل مع الإدارة لإعادة تفعيل حسابك`
         })
       )
     } else if (Number(user.shms_user_reset_token_expires) < Date.now()) {
       return new Response(
         JSON.stringify({
           newPassSet: 0,
-          message: `Sorry, Your Password Reset Link Has Expired, Please Request A New One`
+          message: `عفواً, رابط إعادة تعيين كلمة المرور منتهي الصلاحية, يرجى إعادة طلب إعادة تعيين كلمة المرور`
         })
       )
     } else if (JSON.parse(token) === user.shms_user_reset_token) {
@@ -46,15 +46,17 @@ export async function POST(req: Request) {
 
       //send the user an email with a link to reset his/her password
       const emailData = {
-        from: ADMIN_EMAIL ?? 'mr.hamood277@gmail.com',
+        from: `شمس للخدمات الزراعية | SHMS Agriculture <${ADMIN_EMAIL}>`,
         to: user.shms_email,
-        subject: 'Your Password Has been Reset',
+        subject: 'تم إعادة تعيين كلمة المرور بنجاح | شمس للخدمات الزراعية',
         msg: customEmail({
-          title: 'Your password has been rest successfully',
-          msg: `If you did not reset your password,
-            please contact us as soon as possible, otherwise this email is just for notifying you for the change that happened
-            <br />
-            <small>No need to reply to this email.</small>`
+          title: `تم إعادة تعيين كلمة المرور بنجاح`,
+          msg: `عزيزي ${user.shms_fullname}،,
+            تم إعادة تعيين كلمة المرور الخاصة بك بنجاح، يمكنك الآن تسجيل الدخول باستخدام كلمة المرور الجديدة.
+            <br /><br />
+            إذا لم تقم بإجراء هذا الإجراء، فيرجى الاتصال بنا على الفور
+            شكراً لك،
+            <small>لا حاجة للرد على هذا البريد الإلكتروني.</small>`
         })
       }
 
@@ -64,7 +66,7 @@ export async function POST(req: Request) {
         if (accepted.length > 0) {
           return new Response(
             JSON.stringify({
-              message: `An email has been sent to your email address: ${user.shms_email} with the new password`,
+              message: `تم إعادة تعيين كلمة المرور بنجاح, جاري تحويلك إلى صفحة تسجيل الدخول...`,
               newPassSet: 1
             })
           )
@@ -72,8 +74,8 @@ export async function POST(req: Request) {
           return new Response(
             JSON.stringify({
               newPassSet: 0,
-              message: `Sorry, we couldn't send the email to your email address: ${
-                rejected[0] /*.message*/
+              message: `عفواً, لم يتم إرسال رسالة إعادة تعيين كلمة المرور, يرجى المحاولة مرة أخرى, وإذا استمرت المشكلة يرجى التواصل مع الإدارة
+                ${rejected[0] /*.message*/}
               }`
             })
           )
@@ -82,7 +84,7 @@ export async function POST(req: Request) {
         return new Response(
           JSON.stringify({
             message: `Ooops!, something went wrong!: ${error} `,
-            mailSent: 0
+            newPassSet: 0
           })
         )
       }
@@ -94,11 +96,10 @@ export async function POST(req: Request) {
         })
       )
     } else {
-      //The password reset link you used is invalid, please request a new one`
       return new Response(
         JSON.stringify({
           newPassSet: 0,
-          message: `The password reset link you used is invalid, please request a new one`
+          message: `عفواً, رابط إعادة تعيين كلمة المرور غير صالح, يرجى إعادة طلب إعادة تعيين كلمة المرور`
         }),
         { status: 400 }
       )
@@ -106,8 +107,8 @@ export async function POST(req: Request) {
   } catch (error) {
     return new Response(
       JSON.stringify({
-        message: `Ooops!, something went wrong!: ${error}`,
-        newPassSet: 1
+        message: `Ooops!, Server Error!: ${error}`,
+        newPassSet: 0
       })
     )
   }

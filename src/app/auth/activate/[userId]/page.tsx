@@ -9,9 +9,9 @@ import { API_URL } from '@/data/constants'
 import { Error, Success } from '@/components/icons/Status'
 import { CardWrapper } from '@/components/auth/card-wrapper'
 import { Button } from '@/components/ui/button'
-import type { UserProps } from '@/types'
 import { cn, validateUUID } from '@/lib/utils'
 import { Info } from 'lucide-react'
+import type { UserProps } from '@/types'
 
 export default function ActivateAccount({
   params: { userId }

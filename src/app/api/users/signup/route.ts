@@ -2,12 +2,11 @@ import { connectDB } from '../../utils/db'
 import { genSalt, hash } from 'bcryptjs'
 import { randomUUID } from 'crypto'
 import { ResultSetHeader } from 'mysql2/promise'
-import type { NextRequest } from 'next/server'
 import email, { customEmail } from '../../utils/email'
-import type { UserProps } from '@/types'
 import { ADMIN_EMAIL, APP_URL } from '@/data/constants'
+import type { UserProps } from '@/types'
 
-export async function POST(req: NextRequest) {
+export async function POST(req: Request) {
   const body = await req.json()
   const {
     userFullName,

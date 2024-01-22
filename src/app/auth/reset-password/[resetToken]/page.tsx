@@ -1,30 +1,38 @@
 'use client'
 
-import axios from 'axios'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import axios from 'axios'
 import { CardWrapper } from '@/components/auth/card-wrapper'
 import FormMessage from '@/components/custom/FormMessage'
 import { Button } from '@/components/ui/button'
-import { API_URL, DEFAULT_DURATION } from '@/data/constants'
-import { validateEmail } from '@/lib/utils'
+import { Error, Success } from '@/components/icons/Status'
+import { validatePasswordStrength } from '@/lib/utils'
 import { ReloadIcon } from '@radix-ui/react-icons'
-import { Error } from '@/components/icons/Status'
+import { validateUUID } from '@/lib/utils'
 import { toast } from 'sonner'
-import { Info } from 'lucide-react'
+import { API_URL, DEFAULT_DURATION } from '@/data/constants'
 import type { UserProps } from '@/types'
 
-const ForgotPasswordPage = () => {
-  const HEADING = 'إستعادة كلمة المرور'
+const ForgotPasswordPage = ({
+  params: { resetToken }
+}: {
+  params: { resetToken: string }
+}) => {
+  const HEADING = 'إنشاء كلمة المرور جديدة'
 
-  const [email, setEmail] = useState('')
-  const [emailError, setEmailError] = useState('')
-  const [isSubmittingForm, setIsSubmittingForm] = useState(false)
+  const [password, setPassword] = useState('')
+  const [passError, setPassError] = useState('')
+  const [isSubmittingForm, setIsSubmittingForm] = useState<boolean | 'completed'>(false)
 
   const { replace } = useRouter()
 
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPassword(e.target.value)
+  }
+
   function resetFormErrors() {
-    setEmailError('')
+    setPassError('')
   }
 
   const handelResetForm = async (e: {
@@ -35,27 +43,28 @@ const ForgotPasswordPage = () => {
     // don't refresh the page
     e.preventDefault()
 
-    if (email === '') {
-      setEmailError('البريد الالكتروني مطلوب')
+    if (password === '') {
+      setPassError('الرجاء إدخال كلمة المرور الجديدة')
       return
-    } else if (!validateEmail(email)) {
-      resetFormErrors()
-      setEmailError('الرجاء التأكد من صحة البريد الالكتروني')
+    } else if (!validatePasswordStrength(password)) {
+      setPassError(
+        'كلمة المرور يجب ان تكون على الاقل 8 احرف وتحتوي على حرف كبير وحرف صغير ورقم وحرف خاص مثل !@#$%^&*()'
+      )
     } else {
       try {
         resetFormErrors()
         setIsSubmittingForm(true)
 
-        const resetPass = await axios.post(`${API_URL}/users/forgotpass`, { email })
+        const resetPass = await axios.post(`${API_URL}/users/resetpass`, { password })
         //getting response from backend
         const { data } = resetPass
 
         // make sure to view the response from the data
-        data.forgotPassSent === 1
+        data.newPassSet === 1
           ? toast(
-              'تم إرسال بريد الكتروني لإعادة تعيين كلمة المرور، الرجاء إتباع التعليمات في البريد لتفعيل حسابك 👍🏼',
+              'تم إعادة كلمة المرور، وتم إرسال بريد الكتروني لتأكيد تغيير كلمة المرور الجديدة بنجاح',
               {
-                icon: <Info className='text-blue-300' />,
+                icon: <Success />,
                 position: 'bottom-center',
                 className: 'text-right select-none rtl',
                 duration: DEFAULT_DURATION,
@@ -69,9 +78,10 @@ const ForgotPasswordPage = () => {
               }
             )
           : toast('حدث خطأ ما، الرجاء المحاولة مرة أخرى', {
-              icon: <Error className='w-6 h-6 ml-3' />,
+              icon: <Error />,
               position: 'bottom-center',
               className: 'text-right select-none rtl',
+              duration: DEFAULT_DURATION,
               style: {
                 backgroundColor: '#FFF0F0',
                 color: '#BE2A2A',
@@ -81,7 +91,7 @@ const ForgotPasswordPage = () => {
               }
             })
 
-        setTimeout(() => replace(`/`), DEFAULT_DURATION - 1000)
+        // setTimeout(() => replace(`/`), DEFAULT_DURATION)
       } catch (error: any) {
         const message: UserProps['message'] = error?.response.data.message ?? 'حدث خطأ ما'
         //handle error, show notification using Shadcn notifcation
@@ -99,17 +109,17 @@ const ForgotPasswordPage = () => {
         })
         console.error('Error', error)
       } finally {
-        setIsSubmittingForm(false)
+        setIsSubmittingForm('completed')
       }
     }
   }
 
-  return (
+  return validateUUID(resetToken) ? null : (
     <section className='min-h-screen h-screen mt-64 md:mt-[25rem] mb-24'>
       <CardWrapper
         heading={HEADING}
-        backButtonLabel='تذكرت كلمة المرور؟ سجل دخولك'
-        backButtonHref='/auth/signin'
+        backButtonLabel='الصفحة الرئيسية'
+        backButtonHref='/'
         className='md:w-[50rem]'
       >
         <form
@@ -117,23 +127,23 @@ const ForgotPasswordPage = () => {
           dir='rtl'
           onSubmit={e => handelResetForm(e)}
         >
-          {emailError && <FormMessage error>{emailError}</FormMessage>}
+          {passError && <FormMessage error>{passError}</FormMessage>}
           <div className='md:flex md:items-center mb-6'>
             <div className='md:w-1/3'>
               <label
-                htmlFor='email'
+                htmlFor='password'
                 className='block text-gray-500 font-bold md:text-right mb-1 md:mb-0'
               >
-                البريد الالكتروني
+                كلمة المرور
               </label>
             </div>
             <div className='md:w-2/3'>
               <input
-                id='email'
-                onChange={e => setEmail(e.target.value)}
+                id='password'
+                onChange={handlePasswordChange}
                 className='bg-gray-200 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 rounded w-full py-2 px-4 text-gray-700 leading-tight focus:outline-none focus:bg-white focus:border-purple-500'
-                type='email'
-                placeholder='example@gmail.com'
+                type='password'
+                placeholder='******'
               />
             </div>
           </div>
@@ -143,10 +153,12 @@ const ForgotPasswordPage = () => {
             <div className='md:w-2/3'>
               <Button
                 type='submit'
-                disabled={isSubmittingForm}
-                className='shadow w-full bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold'
+                disabled={isSubmittingForm === 'completed'}
+                className={`shadow w-full bg-purple-500 hover:bg-purple-400 focus:shadow-outline focus:outline-none text-white font-bold ${
+                  isSubmittingForm === 'completed' ? 'cursor-not-allowed opacity-50' : ''
+                }`}
               >
-                {isSubmittingForm ? (
+                {isSubmittingForm === 'completed' ? (
                   <>
                     <ReloadIcon className='ml-3 h-4 w-4 animate-spin' />
                     جاري الإرسال

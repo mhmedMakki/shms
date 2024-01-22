@@ -2,27 +2,23 @@ import { randomUUID } from 'crypto'
 import { connectDB } from '../../utils/db'
 import { ADMIN_EMAIL, APP_URL } from '@/data/constants'
 import email, { customEmail } from '../../utils/email'
-import { UserProps } from '@/types'
+import type { UserProps } from '@/types'
 
 export async function POST(req: Request) {
   const body = await req.json()
-  const { email: userEmail, phone } = body.json()
+  const { email: userResetEmail } = body
 
   try {
     // Check for user by using his/her email or Phoneephone number
     const user = (
-      (await connectDB(`SELECT * FROM users WHERE shms_email = ? OR shms_phone = ?`, [
-        userEmail,
-        phone
+      (await connectDB(`SELECT * FROM users WHERE shms_email = ?`, [
+        userResetEmail
       ])) as UserProps[]
     )[0]
 
     if (!user) {
       return new Response(
-        JSON.stringify({
-          forgotPassSent: 0,
-          message: `Sorry, we couldn't find your account`
-        }),
+        JSON.stringify({ forgotPassSent: 0, message: `عفواً، لم يتم العثور على حسابك!` }),
         { status: 404 }
       )
     } else {
@@ -30,32 +26,29 @@ export async function POST(req: Request) {
         return new Response(
           JSON.stringify({
             forgotPassSent: 0,
-            message: `Your Account Has Been Blocked, Please Contact The Admin`
+            message: `عفواً! حسابك محظور! لا يمكنك إعادة تعيين كلمة المرور!`
           }),
           { status: 403 }
         )
-      } else if (
-        user.shms_user_reset_token &&
-        Number(user.shms_user_reset_token_expires) > Date.now()
-      ) {
+      } else if (Number(user.shms_user_reset_token_expires) > Date.now()) {
         return new Response(
           JSON.stringify({
             forgotPassSent: 0,
-            message: `Your Already Have A Pending Password Reset Request, Please Check Your Email Inbox`
+            message: `عفواً! لديك بالفعل طلب معلق لإعادة تعيين كلمة المرور، يرجى التحقق من صندوق البريد الإلكتروني الخاص بك`
           }),
           { status: 403 }
         )
       } else if (user.shms_user_account_status === 'active') {
         const userResetPasswordToken = randomUUID()
-        const userResetPasswordExpires = Date.now() + 3600000 // 1 hour
+        const userCanResetPasswordUntil = Date.now() + 3600000 // 1 hour from now
 
         await connectDB(
           `UPDATE users SET shms_user_reset_token = ?, shms_user_reset_token_expires = ? WHERE shms_id = ?`,
-          [userResetPasswordToken, userResetPasswordExpires, user.shms_id]
+          [userResetPasswordToken, userCanResetPasswordUntil, user.shms_id]
         )
 
         //send the user an email with a link to reset his/her password
-        const buttonLink = APP_URL + `/auth/reset?t=${userResetPasswordToken}`
+        const buttonLink = APP_URL + `/auth/reset-password/${userResetPasswordToken}`
 
         const emailData = {
           from: `شمس للخدمات الزراعية | SHMS Agriculture <${ADMIN_EMAIL}>`,
@@ -70,7 +63,7 @@ export async function POST(req: Request) {
           if (accepted.length > 0) {
             return new Response(
               JSON.stringify({
-                message: `An email has been sent to your email address: ${user.shms_email} with the instructions on how to reset the password`,
+                message: `تم إرسال رابط إعادة تعيين كلمة المرور إلى  ${user.shms_email} بنجاح! مع تعليمات إعادة تعيين كلمة المرور`,
                 forgotPassSent: 1
               })
             )
@@ -78,9 +71,10 @@ export async function POST(req: Request) {
             return new Response(
               JSON.stringify({
                 forgotPassSent: 0,
-                message: `Sorry, we couldn't send the email to your email address: ${
-                  rejected[0] /*.message*/
-                }`
+                message: `عفواً حدث خطأ ما!، لم يتم إرسال رابط إعادة تعيين كلمة المرور إلى  ${
+                  user.shms_email
+                }!
+                 ${rejected[0] /*.message*/}`
               })
             )
           }
@@ -88,7 +82,7 @@ export async function POST(req: Request) {
           return new Response(
             JSON.stringify({
               message: `Ooops!, something went wrong!: ${error} `,
-              mailSent: 0
+              forgotPassSent: 0
             })
           )
         }
@@ -98,7 +92,7 @@ export async function POST(req: Request) {
     return new Response(
       JSON.stringify({
         message: `Ooops!, something went wrong!: ${error}`,
-        newPassSet: 1
+        forgotPassSent: 0
       })
     )
   }
